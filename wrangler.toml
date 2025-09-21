@@ -1,0 +1,8 @@
+name = "weather-backend"
+compatibility_date = "2025-09-21"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "weather-db"
+database_id = "auto-generated-id"
+migrations_dir = "backend/migrations"
