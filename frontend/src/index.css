@@ -1,3 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* === Global Overrides === */
+body {
+  @apply bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-gray-200 antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-semibold tracking-wide;
+}

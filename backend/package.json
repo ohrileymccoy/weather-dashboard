@@ -1,0 +1,12 @@
+{
+  "name": "weather-dashboard",
+  "private": true,
+  "scripts": {
+    "dev": "npm run build --prefix frontend && wrangler pages dev frontend/dist --local",
+    "build": "npm run build --prefix frontend",
+    "deploy": "npm run build --prefix frontend && wrangler pages deploy frontend/dist"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240919.0"
+  }
+}

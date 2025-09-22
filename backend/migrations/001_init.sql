@@ -1,0 +1,8 @@
+CREATE TABLE weather (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  city TEXT NOT NULL,
+  date TEXT NOT NULL,
+  temp REAL,
+  humidity REAL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);

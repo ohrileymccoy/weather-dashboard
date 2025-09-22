@@ -1,5 +1,8 @@
-name = "weather-backend"
+name = "weather-dashboard"
 compatibility_date = "2025-09-21"
+
+[site]
+bucket = "./frontend/dist"
 
 [[d1_databases]]
 binding = "DB"
