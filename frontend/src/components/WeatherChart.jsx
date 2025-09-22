@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 
 export default function WeatherChart({ city = "Oak Hill" }) {
   const [data, setData] = useState([]);
+  const [unit, setUnit] = useState("C"); // "C" or "F"
 
   useEffect(() => {
     const fetchForecast = async () => {
@@ -42,7 +43,7 @@ export default function WeatherChart({ city = "Oak Hill" }) {
             date: new Date(entry.dt_txt).toLocaleDateString("en-US", {
               weekday: "short",
             }),
-            temp: Math.round(entry.main.temp),
+            tempC: Math.round(entry.main.temp),
             humidity: entry.main.humidity,
           }));
 
@@ -54,6 +55,15 @@ export default function WeatherChart({ city = "Oak Hill" }) {
 
     fetchForecast();
   }, [city]);
+
+  // Convert based on selected unit
+  const displayData =
+    unit === "F"
+      ? data.map((d) => ({
+          ...d,
+          temp: Math.round(d.tempC * 9 / 5 + 32),
+        }))
+      : data.map((d) => ({ ...d, temp: d.tempC }));
 
   return (
     <div className="space-y-8 mt-10">
@@ -71,6 +81,16 @@ export default function WeatherChart({ city = "Oak Hill" }) {
         ></iframe>
       </motion.div>
 
+      {/* Toggle */}
+      <div className="flex justify-end mb-2">
+        <button
+          onClick={() => setUnit(unit === "C" ? "F" : "C")}
+          className="px-4 py-1 rounded-lg bg-gray-800/80 text-sm text-indigo-300 hover:bg-indigo-600/30 transition"
+        >
+          Switch to °{unit === "C" ? "F" : "C"}
+        </button>
+      </div>
+
       {/* Charts Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 min-w-0">
         {/* Temp Trend */}
@@ -79,13 +99,16 @@ export default function WeatherChart({ city = "Oak Hill" }) {
           className="bg-gray-900/70 p-4 rounded-xl shadow-lg backdrop-blur-md min-w-0"
         >
           <h3 className="text-lg font-semibold mb-2 text-indigo-300">
-            🌡 Temperature Trend
+            🌡 Temperature Trend (°{unit})
           </h3>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data}>
+            <LineChart data={displayData}>
               <XAxis dataKey="date" stroke="#aaa" />
               <YAxis stroke="#aaa" />
-              <Tooltip />
+              <Tooltip
+                formatter={(value) => `${value}°${unit}`}
+                labelStyle={{ color: "#fff" }}
+              />
               <Line
                 type="monotone"
                 dataKey="temp"
@@ -103,13 +126,13 @@ export default function WeatherChart({ city = "Oak Hill" }) {
           className="bg-gray-900/70 p-4 rounded-xl shadow-lg backdrop-blur-md min-w-0"
         >
           <h3 className="text-lg font-semibold mb-2 text-emerald-300">
-            💧 Humidity Levels
+            💧 Humidity Levels (%)
           </h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data}>
+            <BarChart data={displayData}>
               <XAxis dataKey="date" stroke="#aaa" />
               <YAxis stroke="#aaa" />
-              <Tooltip />
+              <Tooltip formatter={(value) => `${value}%`} />
               <Bar dataKey="humidity" fill="#34d399" />
             </BarChart>
           </ResponsiveContainer>

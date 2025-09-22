@@ -4,9 +4,8 @@
 
 /* === Global Overrides === */
 body {
-  @apply bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-gray-200 antialiased;
+  @apply bg-gradient-to-br from-black via-[#111418] to-[#2a2e33] text-gray-200 antialiased;
 }
-
 h1, h2, h3, h4, h5, h6 {
   @apply font-semibold tracking-wide;
 }

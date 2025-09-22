@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import globeImg from "../assets/globe.png";
 
 const baseCities = [
   "Oak Hill",
@@ -59,15 +60,20 @@ export default function OrbitingCityCards({ onSelectCity }) {
   return (
     <div className="relative flex justify-center items-start h-full">
       <div className="relative w-[380px] h-[380px] perspective-[1200px] mt-2">
-        {/* Holographic Globe */}
-        <div
-          className="absolute top-0 left-1/2 w-56 h-56 -translate-x-1/2 
-                     rounded-full bg-gradient-to-br from-cyan-500 to-indigo-800 
-                     shadow-[0_0_60px_rgba(0,255,255,0.5)] relative overflow-hidden"
-        >
-          <div className="absolute inset-0 rounded-full border border-cyan-400/30 animate-spin-slow" />
-          <div className="absolute inset-4 rounded-full border border-cyan-400/20 animate-spin-slow-reverse" />
-        </div>
+        {/* Globe Image */}
+<div
+  className="absolute top-0 left-1/2 w-56 h-56 -translate-x-1/2 rounded-full 
+             shadow-[0_0_60px_rgba(0,255,255,0.5)] overflow-hidden"
+>
+  <img
+    src={globeImg}
+    alt="Digital Globe"
+    className="w-full h-full object-cover animate-spin-slow opacity-90"/>
+  {/* optional holographic lines overlay */}
+  <div className="absolute inset-0 rounded-full border border-cyan-400/30 animate-spin-slow pointer-events-none" />
+  <div className="absolute inset-4 rounded-full border border-cyan-400/20 animate-spin-slow-reverse pointer-events-none" />
+</div>
+
 
         {/* Orbiting Cards */}
         {cities.map((city, i) => {
