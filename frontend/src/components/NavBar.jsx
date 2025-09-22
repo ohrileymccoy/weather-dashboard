@@ -35,8 +35,9 @@ export default function NavBar() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute right-0 mt-3 w-48 rounded-xl shadow-xl 
-                         bg-gray-800/90 backdrop-blur-lg overflow-hidden"
+              className="absolute right-0 mt-3 w-48 rounded-xl shadow-xl z-[9999]
+           bg-gray-800/90 backdrop-blur-lg overflow-hidden"
+
             >
               {navItems.map((item) => (
                 <div

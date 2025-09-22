@@ -1,35 +1,70 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-const cities = [
-  { name: "Oak Hill", temp: 22, icon: "☀️", desc: "Clear skies" },
-  { name: "Beckley", temp: 19, icon: "🌧️", desc: "Light showers" },
-  { name: "Charleston", temp: 24, icon: "⛅", desc: "Partly cloudy" },
-  { name: "New York", temp: 18, icon: "🌦️", desc: "Showers" },
-  { name: "Los Angeles", temp: 27, icon: "☀️", desc: "Sunny" },
+const baseCities = [
+  "Oak Hill",
+  "Beckley",
+  "Charleston",
+  "Morgantown",
+  "Huntington",
 ];
 
-export default function OrbitingCityCards() {
+export default function OrbitingCityCards({ onSelectCity }) {
   const [angle, setAngle] = useState(0);
+  const [cities, setCities] = useState([]);
+  const [activeCity, setActiveCity] = useState(null);
 
-  // orbit rotation
+  // Fetch live weather data
+  useEffect(() => {
+    const apiKey = import.meta.env.VITE_OPENWEATHER_KEY;
+    if (!apiKey) {
+      console.error("⚠️ Missing VITE_OPENWEATHER_KEY");
+      return;
+    }
+
+    Promise.all(
+      baseCities.map(async (city) => {
+        try {
+          const res = await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?q=${city},US&units=metric&appid=${apiKey}`
+          );
+          const data = await res.json();
+          return {
+            name: city,
+            temp: Math.round(data.main.temp),
+            icon: data.weather[0].icon,
+            desc: data.weather[0].description,
+          };
+        } catch (err) {
+          console.error("Weather fetch failed for:", city, err);
+          return {
+            name: city,
+            temp: "--",
+            icon: "01d",
+            desc: "Unavailable",
+          };
+        }
+      })
+    ).then(setCities);
+  }, []);
+
+  // Orbit rotation
   useEffect(() => {
     const id = setInterval(() => {
-      setAngle((prev) => prev + 1); // degrees per tick
+      setAngle((prev) => prev + 1);
     }, 50);
     return () => clearInterval(id);
   }, []);
 
   return (
-    <div className="relative flex items-start justify-center h-[700px] pt-8 -translate-y-20">
-      <div className="relative w-[500px] h-[500px] perspective-[1200px]">
+    <div className="relative flex justify-center items-start h-full">
+      <div className="relative w-[380px] h-[380px] perspective-[1200px] mt-2">
         {/* Holographic Globe */}
         <div
-          className="absolute top-1/2 left-1/2 w-56 h-56 -translate-x-1/2 -translate-y-1/2 
+          className="absolute top-0 left-1/2 w-56 h-56 -translate-x-1/2 
                      rounded-full bg-gradient-to-br from-cyan-500 to-indigo-800 
                      shadow-[0_0_60px_rgba(0,255,255,0.5)] relative overflow-hidden"
         >
-          {/* spinning longitude/latitude lines */}
           <div className="absolute inset-0 rounded-full border border-cyan-400/30 animate-spin-slow" />
           <div className="absolute inset-4 rounded-full border border-cyan-400/20 animate-spin-slow-reverse" />
         </div>
@@ -39,33 +74,51 @@ export default function OrbitingCityCards() {
           const step = (2 * Math.PI) / cities.length;
           const cardAngle = angle * (Math.PI / 180) + i * step;
 
-          // Orbit math
-          const radius = 220;
+          const radius = 170;
           const x = Math.cos(cardAngle) * radius;
           const z = Math.sin(cardAngle) * radius;
 
-          // Depth effects
-          const scale = 0.6 + (z / radius) * 0.4; // closer = bigger
-          const opacity = 0.5 + (z / radius) * 0.5; // fade behind
+          const scale = 0.6 + (z / radius) * 0.4;
+
+          let opacity = 0.5 + (z / radius) * 0.5;
+          opacity = Math.max(0, Math.min(1, opacity));
+          opacity = Math.pow(opacity, 1.5);
+
           const zIndex = Math.round(z * 1000);
+          const isActive = activeCity === city.name;
 
           return (
             <motion.div
               key={city.name}
+              onClick={() => {
+                setActiveCity(city.name);
+                onSelectCity?.(city.name);
+              }}
               style={{
-                transform: `translate3d(${x}px, 0px, ${z}px) scale(${scale})`,
+                transform: `translate3d(${x}px, 40px, ${z}px) scale(${scale * (isActive ? 1.05 : 1)})`,
                 zIndex,
                 opacity,
               }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                         w-40 h-56 bg-gray-900/80 text-center rounded-xl p-4 
-                         backdrop-blur-md shadow-lg text-white flex flex-col justify-center
-                         transition-transform duration-300 hover:scale-110"
+              className={`absolute left-1/2 top-0 -translate-x-1/2
+                         w-40 h-56 text-center rounded-xl p-4 
+                         backdrop-blur-md shadow-lg flex flex-col justify-center cursor-pointer
+                         transition duration-300
+                         ${
+                           isActive
+                             ? "bg-gradient-to-br from-cyan-500/80 to-indigo-700/80 shadow-[0_0_35px_rgba(0,200,255,0.9)]"
+                             : "bg-gray-900/80"
+                         }`}
             >
-              <div className="text-4xl mb-2">{city.icon}</div>
+              <img
+                src={`https://openweathermap.org/img/wn/${city.icon}@2x.png`}
+                alt={city.desc}
+                className="w-12 h-12 mx-auto mb-2"
+              />
               <h3 className="font-bold text-lg">{city.name}</h3>
               <p className="text-indigo-300">{city.temp}°C</p>
-              <p className="text-gray-400 text-sm italic">{city.desc}</p>
+              <p className="text-gray-400 text-sm italic capitalize">
+                {city.desc}
+              </p>
             </motion.div>
           );
         })}
