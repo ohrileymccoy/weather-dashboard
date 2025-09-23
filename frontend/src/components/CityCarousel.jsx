@@ -10,12 +10,12 @@ const baseCities = [
   "Huntington",
 ];
 
-export default function OrbitingCityCards({ onSelectCity }) {
+export default function CityCarousel({ onSelectCity, unit }) {
   const [angle, setAngle] = useState(0);
   const [cities, setCities] = useState([]);
   const [activeCity, setActiveCity] = useState(null);
 
-  // Fetch live weather data
+  // Fetch live weather data (always metric)
   useEffect(() => {
     const apiKey = import.meta.env.VITE_OPENWEATHER_KEY;
     if (!apiKey) {
@@ -32,7 +32,7 @@ export default function OrbitingCityCards({ onSelectCity }) {
           const data = await res.json();
           return {
             name: city,
-            temp: Math.round(data.main.temp),
+            tempC: Math.round(data.main.temp),
             icon: data.weather[0].icon,
             desc: data.weather[0].description,
           };
@@ -40,7 +40,7 @@ export default function OrbitingCityCards({ onSelectCity }) {
           console.error("Weather fetch failed for:", city, err);
           return {
             name: city,
-            temp: "--",
+            tempC: null,
             icon: "01d",
             desc: "Unavailable",
           };
@@ -57,25 +57,31 @@ export default function OrbitingCityCards({ onSelectCity }) {
     return () => clearInterval(id);
   }, []);
 
+  // Helper: Celsius → F conversion
+  const formatTemp = (tempC) => {
+    if (tempC == null || tempC === "--") return "--";
+    return unit === "F" ? Math.round(tempC * 9 / 5 + 32) : tempC;
+  };
+
   return (
     <div className="relative flex justify-center items-start h-full">
       <div className="relative w-[380px] h-[380px] perspective-[1200px] mt-2">
-        {/* Globe Image */}
-<div
-  className="absolute top-0 left-1/2 w-56 h-56 -translate-x-1/2 rounded-full 
-             shadow-[0_0_60px_rgba(0,255,255,0.5)] overflow-hidden"
->
-  <img
-    src={globeImg}
-    alt="Digital Globe"
-    className="w-full h-full object-cover animate-spin-slow opacity-90"/>
-  {/* optional holographic lines overlay */}
-  <div className="absolute inset-0 rounded-full border border-cyan-400/30 animate-spin-slow pointer-events-none" />
-  <div className="absolute inset-4 rounded-full border border-cyan-400/20 animate-spin-slow-reverse pointer-events-none" />
-</div>
+        {/* 🌍 Rotating Globe */}
+        <div
+          className="absolute top-0 left-1/2 w-56 h-56 -translate-x-1/2 rounded-full 
+                     shadow-[0_0_60px_rgba(0,255,255,0.5)] overflow-hidden"
+        >
+          <img
+            src={globeImg}
+            alt="Digital Globe"
+            className="w-full h-full object-cover animate-spin-slow opacity-90"
+          />
+          {/* holographic overlays */}
+          <div className="absolute inset-0 rounded-full border border-cyan-400/30 animate-spin-slow pointer-events-none" />
+          <div className="absolute inset-4 rounded-full border border-cyan-400/20 animate-spin-slow-reverse pointer-events-none" />
+        </div>
 
-
-        {/* Orbiting Cards */}
+        {/* Orbiting City Cards */}
         {cities.map((city, i) => {
           const step = (2 * Math.PI) / cities.length;
           const cardAngle = angle * (Math.PI / 180) + i * step;
@@ -101,7 +107,9 @@ export default function OrbitingCityCards({ onSelectCity }) {
                 onSelectCity?.(city.name);
               }}
               style={{
-                transform: `translate3d(${x}px, 40px, ${z}px) scale(${scale * (isActive ? 1.05 : 1)})`,
+                transform: `translate3d(${x}px, 40px, ${z}px) scale(${
+                  scale * (isActive ? 1.05 : 1)
+                })`,
                 zIndex,
                 opacity,
               }}
@@ -121,7 +129,9 @@ export default function OrbitingCityCards({ onSelectCity }) {
                 className="w-12 h-12 mx-auto mb-2"
               />
               <h3 className="font-bold text-lg">{city.name}</h3>
-              <p className="text-indigo-300">{city.temp}°C</p>
+              <p className="text-indigo-300">
+                {formatTemp(city.tempC)}°{unit}
+              </p>
               <p className="text-gray-400 text-sm italic capitalize">
                 {city.desc}
               </p>

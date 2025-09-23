@@ -11,9 +11,8 @@ import {
 } from "recharts";
 import { motion } from "framer-motion";
 
-export default function WeatherChart({ city = "Oak Hill" }) {
+export default function WeatherChart({ city = "Oak Hill", unit }) {
   const [data, setData] = useState([]);
-  const [unit, setUnit] = useState("C"); // "C" or "F"
 
   useEffect(() => {
     const fetchForecast = async () => {
@@ -56,7 +55,7 @@ export default function WeatherChart({ city = "Oak Hill" }) {
     fetchForecast();
   }, [city]);
 
-  // Convert based on selected unit
+  // Convert based on shared unit prop
   const displayData =
     unit === "F"
       ? data.map((d) => ({
@@ -67,7 +66,7 @@ export default function WeatherChart({ city = "Oak Hill" }) {
 
   return (
     <div className="space-y-8 mt-10">
-      {/* Oak Hill Doppler Radar */}
+      {/* Doppler Radar */}
       <motion.div
         whileHover={{ scale: 1.01 }}
         className="w-full h-[400px] rounded-xl overflow-hidden shadow-lg bg-gray-900/70 backdrop-blur-md"
@@ -80,16 +79,6 @@ export default function WeatherChart({ city = "Oak Hill" }) {
           title={`${city} Doppler Radar`}
         ></iframe>
       </motion.div>
-
-      {/* Toggle */}
-      <div className="flex justify-end mb-2">
-        <button
-          onClick={() => setUnit(unit === "C" ? "F" : "C")}
-          className="px-4 py-1 rounded-lg bg-gray-800/80 text-sm text-indigo-300 hover:bg-indigo-600/30 transition"
-        >
-          Switch to °{unit === "C" ? "F" : "C"}
-        </button>
-      </div>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 min-w-0">

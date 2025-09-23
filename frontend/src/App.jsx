@@ -6,6 +6,7 @@ import LocalForecast from "./components/LocalForecast";
 
 export default function App() {
   const [activeCity, setActiveCity] = useState("Oak Hill");
+  const [unit, setUnit] = useState("F"); // 🔥 shared temperature toggle
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -19,14 +20,19 @@ export default function App() {
               <CityCarousel
                 onSelectCity={setActiveCity}
                 activeCity={activeCity}
+                unit={unit} // pass unit down
               />
             </div>
-            <LocalForecast city={activeCity} />
+            <LocalForecast
+              city={activeCity}
+              unit={unit}
+              setUnit={setUnit} // pass toggle control here
+            />
           </div>
 
-          {/* RIGHT SIDE: WeatherChart stays untouched (map + graphs stack) */}
+          {/* RIGHT SIDE: WeatherChart (map + graphs stack) */}
           <div>
-            <WeatherChart />
+            <WeatherChart city={activeCity} unit={unit} />
           </div>
         </div>
       </main>
